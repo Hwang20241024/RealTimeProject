@@ -22,7 +22,7 @@ export const nicknameEvent = async (data, userInfo) => {
         },
         best_info: {
           stage: null,
-          score: null,
+          score: 100,
         },
         x: null,
         y: null,

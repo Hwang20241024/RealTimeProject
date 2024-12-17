@@ -23,9 +23,9 @@ export const gameLog = (io, socket, type, data) => {
 };
 
 // 플레이어 패킷 보내기
-export const mainUserInfo = (socket, data, name) => {  
-  if(!data) {
-    console.log("보낼 데이터가 없습니다.");
+export const mainUserInfo = (socket, data, name) => {
+  if (!data) {
+    console.log('보낼 데이터가 없습니다.');
   }
 
   const info = {
@@ -47,27 +47,23 @@ export const mainUserInfo = (socket, data, name) => {
   });
 };
 
-// 헤제.
-export const handleDisconnect = (socket, uuid) => {
-  //removeUser(socket.id);
-  console.log(`User disconnected:  ${socket.id}`);
-  //console.log('Current users: ', getUser());
-};
-
-// 접속?
-export const handleConnection = (socket, uuid) => {
-  console.log(`New user connected!: ${uuid} with socket ID ${socket.id}`);
-  //console.log(`Current users: `, getUser());
-
-  // 메시지 수신 예시
-  socket.on('message', (msg) => {
-    console.log('Message received: ', msg); // 수신한 메시지 출력
-    socket.emit('response', 'Hello from server!'); // 클라이언트로 응답 보내기
-  });
-
-  socket.emit('connection', { uuid });
-};
-
-export const handlerEvent = (io, socket, data) => {
-  mainSceneUpdate(io, socket, data);
+// 랭킹 보내기
+export const rankings = (io, socket, type, data) => {
+  if (type === 'cumulativeRankings') {
+    // 누적 랭킹.
+    io.emit('cumulativeRankings', {
+      userId: socket.id,
+      clientVersion: CLIENT_VERSION,
+      handlerId: 2,
+      payload: { status: 'success', message: data },
+    });
+  } else if (type === 'realTimeRankings') {
+    // 실시간 랭킹.
+    io.emit('realTimeRankings', {
+      userId: socket.id,
+      clientVersion: CLIENT_VERSION,
+      handlerId: 3,
+      payload: { status: 'success', message: data },
+    });
+  }
 };

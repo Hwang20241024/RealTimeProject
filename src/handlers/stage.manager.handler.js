@@ -1,15 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
-import { gameLog, mainUserInfo } from './helper.js';
+import { gameLog, mainUserInfo, rankings } from './helper.js';
 import RedisManager from '../redisManager.js';
 
-// 스테이지 연결
+// 핸들러 연결
 import { nicknameEvent } from './stage/main.handler.js';
-// 임시
-// import { stage1Handler } from './stage/stage1.handler.js';
-// import { stage2Handler } from './stage/stage2.handler.js';
-// import { stage3Handler } from './stage/stage3.handler.js';
-// import { stage4Handler } from './stage/stage4.handler.js';
-// import { stage5Handler } from './stage/stage5.handler.js';
+import { cumulativeRankings } from './rankings.handler.js';
+
 
 // 소캣 사용자 정보 저장용.
 class StageManager {
@@ -71,7 +66,7 @@ let connectedSocketsCount = 0; // 연결된 소켓의 수를 추적하는 변수
 
 
 const stageHandler = (io) => {
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     console.log(`유저가 서버에 접속했습니다. [${socket.id}]`);
 
     // 서버에 총 접속인원.
@@ -99,6 +94,10 @@ const stageHandler = (io) => {
       `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
     );
 
+    // 랭킹보내기
+    const rankingData = await cumulativeRankings();
+    rankings(io,stageManager.socket, 'cumulativeRankings', rankingData );
+    
     // 메인스테이지 메세지 처리.
     socket.on('nicknameEvent', async (data) => {
       // 닉네임 생성 (이미 존재한다면 기존 정보를 db에서 가져온다.)
