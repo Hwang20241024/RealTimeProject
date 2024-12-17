@@ -87,9 +87,13 @@ class SocketManager {
         // rankingsElement에 추가
         rankingsElement.appendChild(newParagraph); 
       });
+    });
 
-      // 화면 갱신용?
-      rankingsElement.scrollTop = rankingsElement.scrollHeight;
+    // 체널 변경.
+    this.socket.on('seneChange', (data) => {
+      // 로그 메세지 추가.
+      this.currentStage = data.payload.message;
+      console.log("현재 스테이지 : " + this.currentStage)
     });
 
     // 게임로그.

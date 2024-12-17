@@ -1,4 +1,4 @@
-import RedisManager from '../../utils/redisManager.js';
+import RedisManager from '../utils/redisManager.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export const nicknameEvent = async (data, userInfo) => {

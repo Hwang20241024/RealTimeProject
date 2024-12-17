@@ -1,4 +1,4 @@
-import { nicknameEvent } from './stage/main.handler.js';
+import { nicknameEvent } from './nickname.handler.js';
 import { cumulativeRankings, realTimeRankings } from './rankings.handler.js';
 import { gameLog, mainUserInfo, rankings, seneChange } from './helper.js';
 
