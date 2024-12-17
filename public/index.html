@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPARTA.io</title>
+    <style>
+      body {
+        width: 1200px;
+        height: 800px;
+      }
+
+      .container-01 {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        height: 80%;
+      }
+
+      .container-02 {
+        width: 100%;
+        height: 20%;
+      }
+
+      #game-container {
+        width: 70%;
+        height: 100%;
+      }
+
+      #game-info {
+        width: 30%;
+        height: 100%;
+
+        display: flex;
+        flex-direction: column; /* 상하로 정렬 */
+        justify-content: space-between; /* 요소들 사이에 균등한 간격을 둔다 */
+
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+
+      #game-log {
+        width: 98%; /* 전체 너비 */
+        height: 100%; /* 고정된 높이 */
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        text-align: left; /* 텍스트 우측 정렬 */
+        padding: 10px; /* 안쪽 여백 */
+        overflow-y: auto; /* 세로 스크롤 활성화 */
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      #game-log p {
+        margin: 0;
+        padding: 5px 0;
+        color: #333;
+      }
+
+      #game-info-h2 {
+        width: 100%;
+        height: 5%;
+      }
+
+      #cumulative-ranking {
+        width: 100%;
+        height: 80%;
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        box-sizing: border-box; /* padding과 border를 포함하여 크기 지정 */
+        text-align: left; /* 텍스트 우측 정렬 */
+        padding: 10px; /* 안쪽 여백 */
+        overflow-y: auto; /* 세로 스크롤 활성화 */
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      #cumulative-ranking p {
+        margin: 0;
+        padding: 5px 0;
+        color: #333;
+      }
+
+      #game-info-users {
+        width: 100%;
+        height: 5%;
+      }
+
+      #game-info-start {
+        display: flex;
+        justify-content: space-between; /* 좌우로 간격을 두고 정렬 */
+        width: 100%;
+        height: 10%;
+      }
+
+      #username-input {
+        width: 50%;
+        height: 80%;
+      }
+
+      #start-button {
+        width: 50%;
+        height: 89%;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!-- flexbox로 게임과 UI 요소를 나누는 container -->
+    <div class="container-01">
+      <!-- Phaser 게임이 들어갈 div -->
+      <div id="game-container"></div>
+
+      <!-- 게임 정보나 다른 UI 요소들 -->
+      <div id="game-info">
+        <h2 id="game-info-h2">[명예의 전당]</h2>
+        <div id="cumulative-ranking">
+          <p>현재랭킹은 없습니다</p>
+        </div>
+        <p id = "game-info-users">현재 접속인원은 1명입니다</p>
+        <div id="game-info-start">
+          <input
+            type="text"
+            id="username-input"
+            name="username"
+            placeholder="닉네임을 입력하세요"
+          />
+          <button id="start-button">Start Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-02">
+      <!-- 게임로그 -->
+      <div id="game-log">
+        
+      </div>
+    </div>
+
+    <!-- Phaser CDN 연결 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+
+    <!-- socket.io CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    
+    <!-- Phaser 스크립트 연결 -->
+    <script type="module" src="./index.js"></script>
+    <!-- 닉네임 생성  스크립트 연결 -->
+    <script type="module" src="./nickname.js"></script>
+
+
+  </body>
+</html>
