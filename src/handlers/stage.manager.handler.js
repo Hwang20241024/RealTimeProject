@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import { gameLog } from './helper.js';
+import { gameLog, mainUserInfo } from './helper.js';
 import RedisManager from '../redisManager.js';
 
 // 스테이지 연결
-import { mainHandler } from './stage/main.handler.js';
+import { nicknameEvent } from './stage/main.handler.js';
 // 임시
 // import { stage1Handler } from './stage/stage1.handler.js';
 // import { stage2Handler } from './stage/stage2.handler.js';
@@ -20,8 +20,8 @@ class StageManager {
     // 각종 정보를 저장해 놓자.
     this.userInfo = {
       uuid: null,
-      health: null,
-      speed: null,
+      health: 3,
+      speed: 1,
       current_info: {
         stage: null,
         score: null,
@@ -36,21 +36,21 @@ class StageManager {
   }
 
   // 유저 초기화
-  initializeUser(uuid, health, speed, current_info, best_info, x, y) {
+  initializeUser(info) {
     this.userInfo = {
-      uuid: uuid,
-      health: health,
-      speed: speed,
+      uuid: info.uuid,
+      health: info.health,
+      speed: info.speed,
       current_info: {
-        stage: current_info.stage,
-        score: current_info.score,
+        stage: info.current_info.stage,
+        score: info.current_info.score,
       },
       best_info: {
-        stage: best_info.stage,
-        score: best_info.score,
+        stage: info.best_info.stage,
+        score: info.best_info.score,
       },
-      x: x,
-      y: y,
+      x: info.x,
+      y: info.y,
     };
   }
 
@@ -58,12 +58,10 @@ class StageManager {
   switchStage(stage, uuid, SocketsCount, date = null) {
     switch (stage) {
       case 1:
-        this.currentStage = 'main';
-        mainHandler(this.socket, uuid, SocketsCount, date);
+        this.userInfo.current_info.stage = 0;
         break;
       case 2:
-        this.currentStage = 'stage';
-        stage1Handler(this.socket);
+        this.userInfo.current_info.stage = 1;
         break;
     }
   }
@@ -71,8 +69,6 @@ class StageManager {
 
 let connectedSocketsCount = 0; // 연결된 소켓의 수를 추적하는 변수
 
-// 게임로그 종류
-const gameLogType = ['_DEFAULT', '_CURRENT_USERS'];
 
 const stageHandler = (io) => {
   io.on('connection', (socket) => {
@@ -93,38 +89,24 @@ const stageHandler = (io) => {
     gameLog(
       io,
       stageManager.socket,
-      gameLogType[0],
+      0,
       `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
     );
     gameLog(
       io,
       stageManager.socket,
-      gameLogType[1],
+      1,
       `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
     );
 
     // 메인스테이지 메세지 처리.
     socket.on('nicknameEvent', async (data) => {
-      if (stageManager.currentStage === 'main' && data.payload.status === 'success') {
-        let user = await RedisManager.getExampleData("user:" +data.payload.message);
+      // 닉네임 생성 (이미 존재한다면 기존 정보를 db에서 가져온다.)
+      const info = await nicknameEvent(data, stageManager.userInfo);
+      stageManager.initializeUser(info);
 
-        console.log(user);
-        // 조회 했는데 없다.? 그럼 새로생성.
-        if (!user) {
-          // 정보 변수 선언.
-          const userId = uuidv4();
-
-          // 유저 초기화.
-          stageManager.initializeUser(userId, 3, 1, { stage: 1, score: 0 }, { stage: 1, score: 0 }, 0, 0);
-
-          console.log("user:" + data.payload.message);
-          // 데이터 생성.
-          await RedisManager.createExampleData("user:" + data.payload.message, stageManager.userInfo);
-        } else {
-          // 존재한다면? 
-          Object.assign(stageManager.userInfo, user);
-        }
-      }
+      // 생성된 정보를 유저에게 보내자.
+      mainUserInfo(stageManager.socket, info, data.payload.message)
     });
 
     // 스테이지 1
@@ -143,13 +125,13 @@ const stageHandler = (io) => {
       gameLog(
         io,
         stageManager.socket,
-        gameLogType[0],
+        0,
         `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
       );
       gameLog(
         io,
         stageManager.socket,
-        gameLogType[1],
+        1,
         `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
       );
     });

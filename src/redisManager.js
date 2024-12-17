@@ -3,20 +3,19 @@ import * as redisClient from './redisClient.js';
 class RedisManager {
   // 데이터 생성
   static async createExampleData(key, value) {
-    try {
-      const existingData = await redisClient.getData(key);
-      if (existingData) {
-        console.log('데이터가 이미 존재합니다:', existingData);
-        return; 
-      }
-    } catch (error) {
-      console.error('데이터 생성 실패:', error.message);
+    const existingData = await redisClient.getData(key);
+    if (existingData) {
+      console.log('데이터가 이미 존재합니다:', existingData);
+      return existingData;
+    } else {
+      console.log('통과');
     }
 
-    
     try {
       const result = await redisClient.createData(key, value);
       console.log('데이터 생성 성공:', result);
+
+      return result;
     } catch (error) {
       console.error('데이터 생성 실패:', error.message);
     }

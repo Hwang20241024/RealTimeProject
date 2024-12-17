@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 
 //await RedisManager.deleteExampleData('user:123');
 //await RedisManager.deleteExampleData('user:1234');
-await RedisManager.getDataByPrefix("user");
+await RedisManager.getKeyByPrefix("user");
 
 server.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);

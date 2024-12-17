@@ -1,5 +1,4 @@
 import { Server as SocketIO } from 'socket.io';
-import registerHandler from '../handlers/register.handler.js'; 
 import stageManagerHandler from '../handlers/stage.manager.handler.js';
 
 const initSocket = (server) => {

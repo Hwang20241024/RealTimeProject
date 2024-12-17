@@ -18,7 +18,6 @@ redis.on('error', (err) => {
 
 // 데이터 생성 (SET)
 export const createData = (key, value) => {
-  console.log("안되니?");
   return new Promise((resolve, reject) => {
     redis.set(key, JSON.stringify(value), (err, result) => {
       if (err) {
@@ -46,7 +45,6 @@ export const getData = (key) => {
           reject(new Error('JSON 파싱 실패: ' + parseError.message)); // JSON 파싱 에러
         }
       } else {
-        console.log("여긴들어오나요!!!!!!!!");
         resolve(null); // 데이터가 없으면 null 반환
       }
     });

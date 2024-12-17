@@ -13,7 +13,15 @@ class SocketManager {
           clientVersion: CLIENT_VERSION,
         },
       });
+      this.name = null;
       this.userId = null;
+      this.uuid = null;
+      this.currentStage = null;
+      this.currentScore = null;
+      this.x = null;
+      this.y = null;
+
+      // 서버 접속.
       this.setupListeners();
 
       // 최초 접속시 게임 로그 삭제 
@@ -32,7 +40,7 @@ class SocketManager {
   }
 
   setupListeners() {
-    this.sendMessageToServer("오니");
+    
   
     // 클라입장에서 서버와 접촉후 최초 한번 발생하는 이벤트.
     this.socket.on('connected', (data) => {
@@ -42,10 +50,31 @@ class SocketManager {
       addGameLogMessage(data);
     });
 
-    // 이건 접속 종료 까지 계속연결되면 발생하는 이벤트.
-    this.socket.on('response', (data) => {
-      console.log('Server response:', data);
+    // 닉네임 생성 메세지 
+    this.socket.on('nicknameEvent', (data) => {
+      
+      console.log();
+      
+      // 유저 정보 추가
+      this.name =  data.payload.message.name;
+      this.userId = data.userId;
+      this.uuid = data.payload.message.uuid;
+      this.currentStage =  data.payload.message.current_info.stage;
+      this.currentScore = data.payload.message.current_info.score;
+      this.x = data.payload.message.x;
+      this.y = data.payload.message.y;
+
+      console.log(data);
+
+      // 로그 메세지 추가.
+      addGameLogMessage(this.name + "님이 생성되었습니다.");
+
+
+      // 추가 하자 ..
+      // 랭킹 추가 하자. 
     });
+
+
 
     // 게임로그.
     this.socket.on('gameLog_DEFAULT', (data) => {
@@ -58,13 +87,6 @@ class SocketManager {
       updateUserCount(data.payload.message);
     });
     
-  }
-
-
-  //테스트용도
-  sendMessageToServer(message) {
-    // 서버에 메시지를 보냄
-    this.socket.emit('message', { content: message });
   }
 
   // 여러군대에서 사용할 메세지.
