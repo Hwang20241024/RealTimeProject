@@ -2,8 +2,7 @@ import { gameLog, mainUserInfo, rankings } from './helper.js';
 import RedisManager from '../redisManager.js';
 
 // 핸들러 연결
-import { nicknameEvent } from './stage/main.handler.js';
-import { cumulativeRankings } from './rankings.handler.js';
+import handlerMappings from './handlerMapping.js';
 
 
 // 소캣 사용자 정보 저장용.
@@ -50,7 +49,7 @@ class StageManager {
   }
 
   // 스테이지 전환
-  switchStage(stage, uuid, SocketsCount, date = null) {
+  switchStage(stage) {
     switch (stage) {
       case 1:
         this.userInfo.current_info.stage = 0;
@@ -58,12 +57,23 @@ class StageManager {
       case 2:
         this.userInfo.current_info.stage = 1;
         break;
+      case 3:
+        this.userInfo.current_info.stage = 2;
+        break;
+      case 4:
+        this.userInfo.current_info.stage = 3;
+        break;
+      case 5:
+        this.userInfo.current_info.stage = 4;
+        break;
+      case 6:
+        this.userInfo.current_info.stage = 5;
+        break;
     }
   }
 }
 
 let connectedSocketsCount = 0; // 연결된 소켓의 수를 추적하는 변수
-
 
 const stageHandler = (io) => {
   io.on('connection', async (socket) => {
@@ -81,31 +91,43 @@ const stageHandler = (io) => {
     socket.emit('connected', '게임에 접속하신걸 환영합니다.'); // 클라이언트로 응답 보내기
     socket.emit('connected', '닉네임을 입력하시고 버튼을 누르면 게임을 실행합니다.');
 
-    gameLog(
-      io,
-      stageManager.socket,
-      0,
-      `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
-    );
-    gameLog(
-      io,
-      stageManager.socket,
-      1,
-      `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
-    );
+    // 게임로그 .
+    const gameLog = handlerMappings[4];
+    if(gameLog) {
+      gameLog(io, stageManager.socket, 0, `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`);
+      gameLog(io, stageManager.socket, 1, `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`);
+    }
+
 
     // 랭킹보내기
-    const rankingData = await cumulativeRankings();
-    rankings(io,stageManager.socket, 'cumulativeRankings', rankingData );
+    const cumulativeRankings = handlerMappings[2];
+    const rankings = handlerMappings[6]; 
+    if(cumulativeRankings && rankings) {
+      rankings(io, stageManager.socket, 'cumulativeRankings', await cumulativeRankings());
+    }
     
-    // 메인스테이지 메세지 처리.
-    socket.on('nicknameEvent', async (data) => {
-      // 닉네임 생성 (이미 존재한다면 기존 정보를 db에서 가져온다.)
-      const info = await nicknameEvent(data, stageManager.userInfo);
-      stageManager.initializeUser(info);
 
-      // 생성된 정보를 유저에게 보내자.
-      mainUserInfo(stageManager.socket, info, data.payload.message)
+    //// 1. 메인스테이지 메세지 처리.
+    socket.on('nicknameEvent', async (data) => {
+      // 1-1. 닉네임 생성.
+      const nicknameEvent = handlerMappings[1];
+      const mainUserInfo = handlerMappings[5];
+      
+      if(nicknameEvent && mainUserInfo){
+        // 이미 존재한다면 기존 정보를 db에서 가져온다.
+        const info = await nicknameEvent(data, stageManager.userInfo);
+        stageManager.initializeUser(info);
+
+        // 생성된 정보를 유저에게 보내자.
+        mainUserInfo(stageManager.socket, info, data.payload.message);
+      }
+
+      // 1-2. 스테이지 체인지.
+      const seneChange = handlerMappings[7];
+      if(seneChange){
+        stageManager.switchStage(2);
+      }
+      
     });
 
     // 스테이지 1
@@ -121,18 +143,8 @@ const stageHandler = (io) => {
     // 클라이언트에서 접속헤제 했을때 이벤트
     socket.on('disconnect', () => {
       connectedSocketsCount--;
-      gameLog(
-        io,
-        stageManager.socket,
-        0,
-        `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
-      );
-      gameLog(
-        io,
-        stageManager.socket,
-        1,
-        `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`,
-      );
+      gameLog(io, stageManager.socket, 0, `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`);
+      gameLog(io, stageManager.socket, 1, `현재 접속인원은 ${connectedSocketsCount - 1}명입니다.`);
     });
   });
 };

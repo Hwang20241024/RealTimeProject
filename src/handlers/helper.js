@@ -22,7 +22,7 @@ export const gameLog = (io, socket, type, data) => {
   }
 };
 
-// 플레이어 패킷 보내기
+// 플레이어초기화 패킷 보내기
 export const mainUserInfo = (socket, data, name) => {
   if (!data) {
     console.log('보낼 데이터가 없습니다.');
@@ -47,7 +47,7 @@ export const mainUserInfo = (socket, data, name) => {
   });
 };
 
-// 랭킹 보내기
+// 랭킹 패킷 보내기
 export const rankings = (io, socket, type, data) => {
   if (type === 'cumulativeRankings') {
     // 누적 랭킹.
@@ -67,3 +67,13 @@ export const rankings = (io, socket, type, data) => {
     });
   }
 };
+
+// 씬 변경 패킷 보내기.
+export const seneChange = (socket,data) => {
+  socket.emit('seneChange', {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 7,
+    payload: { status: 'success', message: data },
+  });
+}
