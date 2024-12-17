@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import initSocket from './init/socket.js';
-import RedisManager from './redisManager.js';
+import RedisManager from './utils/redisManager.js';
 
 const app = express();
 const server = createServer(app);

@@ -1,7 +1,4 @@
-import { gameLog, mainUserInfo, rankings } from './helper.js';
-import RedisManager from '../redisManager.js';
-
-// 핸들러 연결
+// 맵핑된 핸들러 연결
 import handlerMappings from './handlerMapping.js';
 
 
@@ -9,7 +6,7 @@ import handlerMappings from './handlerMapping.js';
 class StageManager {
   constructor(socket) {
     this.socket = socket;
-    this.currentStage = null; // 현재 활성화된 핸들러
+
 
     // 각종 정보를 저장해 놓자.
     this.userInfo = {

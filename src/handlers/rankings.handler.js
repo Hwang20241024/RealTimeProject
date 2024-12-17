@@ -1,4 +1,4 @@
-import RedisManager from '../redisManager.js';
+import RedisManager from '../utils/redisManager.js';
 
 // 누적 랭킹
 export const cumulativeRankings = async () => {
