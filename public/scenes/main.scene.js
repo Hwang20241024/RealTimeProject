@@ -24,5 +24,15 @@ export default class MainScene extends Phaser.Scene {
     });
 
     titleText.setOrigin(0.5, 0.5);
+
+    // 텍스트 위아래로 움직이게 하는 트윈 설정
+    this.tweens.add({
+      targets: titleText,
+      y: '+=20', // 위로 20만큼 이동
+      duration: 500, // 0.5초 동안
+      yoyo: true, // 트윈이 끝나면 다시 원래 위치로 돌아옴
+      repeat: -1, // 무한 반복
+      ease: 'Sine.easeInOut', // 부드럽게 움직임
+    });
   }
 }

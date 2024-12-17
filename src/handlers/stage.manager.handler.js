@@ -72,7 +72,6 @@ const stageHandler = (io) => {
       } else {
         console.log(`${socketUser.name}님은 메인메뉴가 아닙니다.`);
       }
-
     });
 
     // 스테이지 1
