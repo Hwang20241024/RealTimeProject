@@ -17,12 +17,7 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello World</h1>');
 });
 
-//await RedisManager.createExampleData('user:123', { name: 'John Doe4', age: 30 });
-//await RedisManager.createExampleData('user:1234', { name: 'John Doe4', age: 30 });
 
-//await RedisManager.deleteExampleData('user:123');
-//await RedisManager.deleteExampleData('user:1234');
-await RedisManager.getKeyByPrefix("user");
 
 server.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);

@@ -15,9 +15,11 @@ export const cumulativeRankings = async () => {
 export const realTimeRankings = async () => {
   // 유저 데이터를 불러온다.
   const userData = await RedisManager.getDataByPrefix('user');
-
+  // 메인메뉴에 있는 놈들은 제외하자.
+  const filteredUserData =  Object.values(userData).filter(user => user.current_info.stage !== 0);
+  
   // 정렬
-  const realTimeRankings = getSortedLeaderboard(userData, 'realTime');
+  const realTimeRankings = getSortedLeaderboard(filteredUserData, 'realTime');
   return displayRankings(realTimeRankings);
 };
 

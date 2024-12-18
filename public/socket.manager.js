@@ -1,7 +1,7 @@
 import { CLIENT_VERSION } from './constants.js';
 
 import { addGameLogMessage, clearAllLogMessages } from './gameLogMessge.js';
-import { updateUserCount } from './usersMessage.js';
+import { updateUserCount, updateRankingInfo } from './usersMessage.js';
 
 // 버튼 액션도 넣자.
 class SocketManager {
@@ -76,7 +76,6 @@ class SocketManager {
   }
   /*===============*/
 
-
   setupListeners() {
     // 클라입장에서 서버와 접촉후 최초 한번 발생하는 이벤트.
     this.socket.on('connected', (data) => {
@@ -86,10 +85,8 @@ class SocketManager {
       addGameLogMessage(data);
     });
 
-    // 닉네임 생성 메세지
+    /*==== 닉네임생성 및 접속 메세지 ====*/
     this.socket.on('nicknameEvent', (data) => {
-      console.log();
-
       // 유저 정보 추가
       this._name = data.payload.message.name;
       this._userId = data.userId;
@@ -99,45 +96,81 @@ class SocketManager {
       this._x = data.payload.message.x;
       this._y = data.payload.message.y;
 
-      console.log(data);
-
       // 로그 메세지 추가.
       addGameLogMessage(this._name + '님이 생성되었습니다.');
-
-      // 스테이지 이동은 서버에서 처리하자. 꼮꼮꼬꼮꼬꼮 잊지말자
     });
+    /*=================*/
 
-    // 랭킹메세지.
+    /*==== 랭킹메세지 ====*/
     this.socket.on('cumulativeRankings', (data) => {
-      // 연결.
-      const rankingsElement = document.querySelector('#game-info-rankings');
+      // 현재 위치가 메인이면 누적 랭킹 표시.
+      if ((this._currentStage === 0 || this._currentStage === null) && data.payload.status === 'success') {
+        // 연결.
+        const rankingsElement = document.querySelector('#game-info-rankings');
 
-      // 기존의 p 태그들 제거 (있다면)
-      rankingsElement.innerHTML = '';
+        // 기존의 p 태그들 제거 (있다면)
+        rankingsElement.innerHTML = '';
 
-      // data.payload.message를 기준으로 p 태그 추가
-      const messages = data.payload.message;
-      messages.forEach((message) => {
-        // 새로운 p 태그 생성
-        const newParagraph = document.createElement('p');
-        // 메시지 추가
-        newParagraph.textContent = message;
-        // rankingsElement에 추가
-        rankingsElement.appendChild(newParagraph);
-      });
+        // data.payload.message를 기준으로 p 태그 추가
+        const messages = data.payload.message;
+        messages.forEach((message) => {
+          // 새로운 p 태그 생성
+          const newParagraph = document.createElement('p');
+          // 메시지 추가
+          newParagraph.textContent = message;
+          // rankingsElement에 추가
+          rankingsElement.appendChild(newParagraph);
+        });
+      };
     });
 
-    
-    // 게임로그.
+    this.socket.on('realTimeRankings', (data) => {
+      console.log(this._currentStage);
+      // 현재 위치가 메인이면 누적 랭킹 표시.
+      if (this._currentStage !== 0 && data.payload.status === 'success') {
+        // 연결.
+        const rankingsElement = document.querySelector('#game-info-rankings');
+
+        // 기존의 p 태그들 제거 (있다면)
+        rankingsElement.innerHTML = '';
+
+        // data.payload.message를 기준으로 p 태그 추가
+        const messages = data.payload.message;
+        messages.forEach((message) => {
+          // 새로운 p 태그 생성
+          const newParagraph = document.createElement('p');
+          // 메시지 추가
+          newParagraph.textContent = message;
+          // rankingsElement에 추가
+          rankingsElement.appendChild(newParagraph);
+        });
+      };
+    });
+    /*=================*/
+
+
+    /*==== 게임로그 ====*/
     this.socket.on('gameLog_DEFAULT', (data) => {
       // 로그 메세지 추가.
       addGameLogMessage(data.payload.message);
     });
-    //
     this.socket.on('gameLog_CURRENT_USERS', (data) => {
       // 로그 메세지 추가.
       updateUserCount(data.payload.message);
     });
+    this.socket.on('gameLog_USER_SPECIFIC', (data) => {
+      // 로그 메세지 추가.
+      addGameLogMessage(data.payload.message);
+    });
+    this.socket.on('gameLog_BEST_INFO', (data) => {
+      // 로그 메세지 추가.
+      updateUserCount(data.payload.message);
+    });
+    this.socket.on('gameLog_RANKING_INFO', (data) => {
+      // 로그 메세지 추가.
+      updateRankingInfo(data.payload.message);
+    });
+    /*=================*/
   }
 
   // 여러군대에서 사용할 메세지.

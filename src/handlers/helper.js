@@ -1,7 +1,7 @@
 import { CLIENT_VERSION } from '../constants.js';
 
 // 콘솔로그 패킷 보내기.
-const gameLogType = ['_DEFAULT', '_CURRENT_USERS', '_USER_SPECIFIC'];
+const gameLogType = ['_DEFAULT', '_CURRENT_USERS', '_USER_SPECIFIC', '_BEST_INFO', '_RANKING_INFO'];
 export const gameLog = (io, socket, type, data) => {
   if (type === 2) {
     // 개인 메세지
@@ -11,7 +11,7 @@ export const gameLog = (io, socket, type, data) => {
       handlerId: 1,
       payload: { status: 'success', message: data },
     });
-  } else if (type === 0 || type === 1) {
+  } else if (type < gameLogType.length) {
     // 전체 메세지.
     io.emit('gameLog' + gameLogType[type], {
       userId: socket.id,

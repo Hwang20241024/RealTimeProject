@@ -81,6 +81,16 @@ export default class SocketUser {
     return this._userInfo.current_info.score;
   }
 
+  // (GET) 최고기록_스테이지.
+  get bestStage() {
+    return this._userInfo.best_info.stage;
+  }
+
+  // (GET) 최고기록_점수.
+  get bestScore() {
+    return this._userInfo.best_info.score;
+  }
+
   // (GET) 좌표.
   get position() {
     const position = {
@@ -131,6 +141,16 @@ export default class SocketUser {
   // (SET) 점수.
   set currentScore(value) {
     this._userInfo.current_info.score = value;
+  }
+
+  // (SET) 스테이지.
+  set bestStage(value) {
+    this._userInfo.best_info.stage = value;
+  }
+
+  // (SET) 점수.
+  set bestScore(value) {
+    this._userInfo.best_info.score = value;
   }
 
   // (SET) 좌표.

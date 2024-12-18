@@ -30,8 +30,10 @@ const stageHandler = (io) => {
 
     // 랭킹보내기
     const cumulativeRankings = handlerMappings[2];
+    const realTimeRankings = handlerMappings[3];
     const rankings = handlerMappings[6];
     if (cumulativeRankings && rankings) {
+      
       rankings(io, socketUser.socket, 'cumulativeRankings', await cumulativeRankings());
     }
 
@@ -39,25 +41,27 @@ const stageHandler = (io) => {
     socket.on('nicknameEvent', async (data) => {
       // 1-0. 유저가 메인메뉴에 있어야 한다.
       if (socketUser.currentStage === 0) {
-        // 1-1. 닉네임 생성.
+        // 1-1. 닉네임 생성 
         const nicknameEvent = handlerMappings[1];
         const mainUserInfo = handlerMappings[5];
-
+        
         if (nicknameEvent && mainUserInfo) {
+
           // 이미 존재한다면 기존 정보를 db에서 가져온다.
           const info = await nicknameEvent(data, socketUser.userInfo);
           socketUser.initializeUser(info);
 
+          socketUser.currentStage = 1; // 위치 바꾸자. 
+
           // 생성된 정보를 유저에게 보내자.
-          mainUserInfo(socketUser.socket, info, data.payload.message);
+          mainUserInfo(socketUser.socket, socketUser.userInfo, data.payload.message);
           socketUser.name = data.payload.message;
+
         }
 
         // 1-2. 스테이지 체인지.
         const seneChange = handlerMappings[7];
         if (seneChange) {
-          socketUser.currentStage = 1;
-
           // 바뀐 스테이지를 유저에게 보내자.
           seneChange(socketUser.socket, socketUser.currentStage);
 
@@ -68,10 +72,20 @@ const stageHandler = (io) => {
             0,
             ` ${socketUser.name}님이 ${socketUser.currentStage}스테이지에 입장하셨습니다.`,
           );
+
+          gameLog(io, socketUser.socket, 3, `현재 최고점수는 [ 스테이지 : ${socketUser.bestStage} 점수 : ${socketUser.bestScore} ]`);
+          gameLog(io, socketUser.socket, 4, `[실시간 랭킹]`);
+
+          if(realTimeRankings){
+            rankings(io, socketUser.socket, 'realTimeRankings', await realTimeRankings());
+          }
+          
+
+
         }
       } else {
         console.log(`${socketUser.name}님은 메인메뉴가 아닙니다.`);
-      }
+      };
     });
 
     // 스테이지 1
