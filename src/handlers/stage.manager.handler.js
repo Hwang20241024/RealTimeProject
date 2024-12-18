@@ -75,7 +75,6 @@ const stageHandler = (io) => {
         // 1-8. 각종 ui 변경.
         gameLog(io, socketUser.socket, 4, `[실시간 랭킹]`);
         rankings(socketUser.socket, 'realTimeRankings', await realTimeRankings());
-
       } else {
         // 중복입장 막기.
         sendErrorMessage(socketUser.socket, 0, '이미 접속한 유저입니다.');
@@ -93,10 +92,17 @@ const stageHandler = (io) => {
     // 스테이지 5
 
     // 클라이언트에서 접속헤제 했을때 이벤트
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       connectedSocketsCount--;
       gameLog(io, socketUser.socket, 0, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
       gameLog(io, socketUser.socket, 1, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
+
+      const currentInfo = {
+        stage: 0,
+        score: 0,
+      };
+      const str = 'user:황만석';
+      await redisManager.updateData(str, 'current_info', currentInfo);
     });
   });
 };

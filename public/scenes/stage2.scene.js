@@ -29,7 +29,6 @@ export default class Stage2Scene extends Phaser.Scene {
 
     titleText.setOrigin(0.5, 0.5);
 
-
     // 텍스트 위아래로 움직이게 하는 트윈 설정
     this.tweens.add({
       targets: titleText,
@@ -39,6 +38,14 @@ export default class Stage2Scene extends Phaser.Scene {
       repeat: -1, // 무한 반복
       ease: 'Sine.easeInOut', // 부드럽게 움직임
     });
+
+    // 스프라이트 추가
+    const gem = this.add.sprite(100, 150, 'gem-1');
+    const cherry = this.add.sprite(200, 150, 'cherry-1');
+
+    // 애니메이션 실행
+    gem.play('gemAnimation');
+    cherry.play('cherryAnimation');
   }
 
   update() {

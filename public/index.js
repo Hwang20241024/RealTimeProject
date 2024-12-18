@@ -11,16 +11,26 @@ import SceneManager from './scene.manager.js';
 
 import SocketManager from './socket.manager.js';
 
+const gameContainer = document.getElementById('game-container');
+
 // 게임 설정
 const config = {
   type: Phaser.AUTO,
-  width: `100%`,
-  height: `100%`,
+  width: gameContainer.clientWidth,
+  height:  gameContainer.clientHeight,
   parent: 'game-container',
   scene: [PreloadScene, MainScene, Stage1Scene, Stage2Scene, Stage3Scene, Stage4Scene, Stage5Scene],
+  physics: {
+    default: 'matter', // matter.js 엔진 사용
+    matter: {
+      gravity: { y: 1 },  // 중력 설정 (필요시)
+      debug: true,         // 디버그 모드
+    }
+  },
   audio: {
     noAudio: true,
   },
+  
 };
 
 // 소켓 초기화.
