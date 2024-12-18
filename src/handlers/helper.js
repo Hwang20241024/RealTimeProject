@@ -3,12 +3,12 @@ import { CLIENT_VERSION } from '../constants.js';
 // 콘솔로그 패킷 보내기.
 const gameLogType = ['_DEFAULT', '_CURRENT_USERS', '_USER_SPECIFIC', '_BEST_INFO', '_RANKING_INFO'];
 export const gameLog = (io, socket, type, data) => {
-  if (type === 2) {
+  if (type === 2 || type === 3 || type === 4) {
     // 개인 메세지
     socket.emit('gameLog' + gameLogType[type], {
       userId: socket.id,
       clientVersion: CLIENT_VERSION,
-      handlerId: 1,
+      handlerId: 4,
       payload: { status: 'success', message: data },
     });
   } else if (type < gameLogType.length) {
@@ -16,7 +16,7 @@ export const gameLog = (io, socket, type, data) => {
     io.emit('gameLog' + gameLogType[type], {
       userId: socket.id,
       clientVersion: CLIENT_VERSION,
-      handlerId: 1,
+      handlerId: 4,
       payload: { status: 'success', message: data },
     });
   }
@@ -48,10 +48,10 @@ export const mainUserInfo = (socket, data, name) => {
 };
 
 // 랭킹 패킷 보내기
-export const rankings = (io, socket, type, data) => {
+export const rankings = (socket, type, data) => {
   if (type === 'cumulativeRankings') {
     // 누적 랭킹.
-    io.emit('cumulativeRankings', {
+    socket.emit('cumulativeRankings', {
       userId: socket.id,
       clientVersion: CLIENT_VERSION,
       handlerId: 2,
@@ -59,7 +59,7 @@ export const rankings = (io, socket, type, data) => {
     });
   } else if (type === 'realTimeRankings') {
     // 실시간 랭킹.
-    io.emit('realTimeRankings', {
+    socket.emit('realTimeRankings', {
       userId: socket.id,
       clientVersion: CLIENT_VERSION,
       handlerId: 3,
@@ -75,5 +75,16 @@ export const seneChange = (socket,data) => {
     clientVersion: CLIENT_VERSION,
     handlerId: 7,
     payload: { status: 'success', message: data },
+  });
+}
+
+// 에러메세지.
+const errorType = ['already_connected',]
+export const sendErrorMessage = (socket,type,data)=> {
+  socket.emit(errorType[type], {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 8,
+    payload: { status: 'fail', message: data },
   });
 }

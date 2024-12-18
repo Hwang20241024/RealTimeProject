@@ -3,11 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const nicknameEvent = async (data, userInfo) => {
   if (userInfo.current_info.stage === 0 && data.payload.status === 'success') {
+    const redisManager = RedisManager.getInstance();
+
     // 찾는다.
-    let user = await RedisManager.getExampleData('user:' + data.payload.message);
+    let user = await redisManager.getAllData('user:' + data.payload.message);
 
     // 조회했는데 없다.? 그럼 새로생성.
-    if (!user) {
+    if (!user || Object.keys(user).length === 0) {
       // 정보 변수 선언.
       const userId = uuidv4();
 
@@ -18,17 +20,22 @@ export const nicknameEvent = async (data, userInfo) => {
         speed: userInfo.speed,
         current_info: {
           stage: userInfo.current_info.stage,
-          score: null,
+          score: 0,
         },
         best_info: {
-          stage: null,
+          stage: 0,
           score: 100,
         },
-        x: null,
-        y: null,
+        x: 0,
+        y: 0,
       };
 
-      await RedisManager.createExampleData('user:' + data.payload.message, info);
+      // 키
+      const userKey = 'user:' + data.payload.message;
+
+      // 데이터를 한 번에 저장
+      await redisManager.createData(userKey, info);
+
       return info;
     } else {
       // 이미존재 한다면

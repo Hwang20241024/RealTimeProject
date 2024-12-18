@@ -171,6 +171,15 @@ class SocketManager {
       updateRankingInfo(data.payload.message);
     });
     /*=================*/
+
+    /*==== 에러메세지 ====*/
+    this.socket.on('already_connected', (data) => {
+      // 로그 메세지 추가.
+      alert(data.payload.message);
+    });
+
+    /*=================*/
+
   }
 
   // 여러군대에서 사용할 메세지.

@@ -2,9 +2,21 @@ import RedisManager from '../utils/redisManager.js';
 
 // 누적 랭킹
 export const cumulativeRankings = async () => {
+  const redisManager = RedisManager.getInstance();
+  
   // 유저 데이터를 불러온다.
-  const userData = await RedisManager.getDataByPrefix('user');
+  const userData = await redisManager.getDataByPrefix('user');
 
+  // const currentInfo = {
+  //   stage: 0,
+  //   score: 0,
+  // };
+  // const str = 'user:황만석';
+  // await redisManager.updateData(str, 'current_info', currentInfo);
+
+
+  //await redisManager.getAllDataFromAllKeys();
+  
   //정렬
   const cumulativeRankings = getSortedLeaderboard(userData, 'cumulative');
   return displayRankings(cumulativeRankings);
@@ -13,14 +25,17 @@ export const cumulativeRankings = async () => {
 
 // 실시간 랭킹
 export const realTimeRankings = async () => {
+  const redisManager = RedisManager.getInstance();
+
   // 유저 데이터를 불러온다.
-  const userData = await RedisManager.getDataByPrefix('user');
-  // 메인메뉴에 있는 놈들은 제외하자.
-  const filteredUserData =  Object.values(userData).filter(user => user.current_info.stage !== 0);
-  
+  const userData = await redisManager.getDataByPrefix('user');
+
   // 정렬
-  const realTimeRankings = getSortedLeaderboard(filteredUserData, 'realTime');
-  return displayRankings(realTimeRankings);
+  const realTimeRankings = getSortedLeaderboard(userData, 'realTime');
+  
+  // 메인메뉴에 있는 놈들은 제외하자. 
+  const filteredUserData =  Object.values(realTimeRankings).filter(user => user.stage !== 0);
+  return displayRankings(filteredUserData);
 };
 
 // 정렬

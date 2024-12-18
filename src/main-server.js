@@ -17,7 +17,8 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello World</h1>');
 });
 
-
+// RedisManager 초기화
+RedisManager.getInstance();
 
 server.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);

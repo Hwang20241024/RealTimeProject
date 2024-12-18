@@ -1,6 +1,6 @@
 import { nicknameEvent } from './nickname.handler.js';
 import { cumulativeRankings, realTimeRankings } from './rankings.handler.js';
-import { gameLog, mainUserInfo, rankings, seneChange } from './helper.js';
+import { gameLog, mainUserInfo, rankings, seneChange, sendErrorMessage } from './helper.js';
 
 const handlerMappings = {
   1: nicknameEvent, // 닉네임.
@@ -10,6 +10,8 @@ const handlerMappings = {
   5: mainUserInfo, // 유저초기화.
   6: rankings, // 랭킹.
   7: seneChange, // 씬체인지.
+  8: sendErrorMessage, // 에러
+  
 };
 
 export default handlerMappings;
