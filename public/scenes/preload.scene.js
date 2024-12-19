@@ -27,9 +27,8 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     // 플레이어 (jump)
-    for (let i = 1; i <= 2; i++) {
-      this.load.image(`player-jump-${i}`, `./assets/players/foxy/jump/player-jump-${i}.png`);
-    }
+    this.load.image('player-jumpUp', `./assets/players/foxy/jump/player-jump-1.png`);
+    this.load.image('player-jumpDown', `./assets/players/foxy/jump/player-jump-2.png`);
 
     // 플레이어 (run)
     for (let i = 1; i <= 6; i++) {
@@ -77,18 +76,6 @@ export default class PreloadScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    // 애니메이션 미리등록 (플레이어 - jump)
-    const playerJumpFrames = [];
-    for (let i = 1; i <= 2; i++) {
-      playerJumpFrames.push({ key: `player-jump-${i}` });
-    }
-
-    this.anims.create({
-      key: 'playerJumpAnimation',
-      frames: playerJumpFrames,
-      frameRate: 10,
-      repeat: -1,
-    });
 
 
     // 애니메이션 미리등록 (플레이어 - run)
