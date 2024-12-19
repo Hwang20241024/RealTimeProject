@@ -193,18 +193,33 @@ export default class Stage1Scene extends Phaser.Scene {
         this.itmes[collidedLabel].destroy(); // gem 객체 삭제
         delete this.itmes[collidedLabel]; // 객체에서 gem 삭제
 
-
-
         // 서버에 메세지 .
-        SocketManager.getInstance().sendEvent("itemPickedUp", 9, {status: 'success', message: collidedLabel});
+        SocketManager.getInstance().sendEvent('itemPickedUp', 9, {
+          status: 'success',
+          message: collidedLabel,
+        });
       }
     });
+
+    // 플레이어 이름을 나타내는 텍스트
+    this.playerNameText = this.add
+      .text(this.player.x, this.player.y - 30, SocketManager.getInstance().name, {
+        font: '12px Arial',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2,
+        align: 'center',
+      })
+      .setOrigin(0.5, 0.5);
 
     // 메세지 처리
     this.handleMessage(Matter, titleText, healthText, scoreText);
   }
 
   update() {
+    // 플레이어 이름
+    this.playerNameText.setPosition(this.player.x, this.player.y - 30); // 플레이어 위로 텍스트 위치 설정
+
     // 플레이어 이동 처리
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-2);
@@ -246,7 +261,7 @@ export default class Stage1Scene extends Phaser.Scene {
   }
 
   // 서버에서 받은 메세지 처리.
-  handleMessage(Matter, titleText, healthText, scoreText ) {
+  handleMessage(Matter, titleText, healthText, scoreText) {
     // 아이템 생성.
     this.socket.on('spawnItem', (data) => {
       //데이터 처리
@@ -254,15 +269,12 @@ export default class Stage1Scene extends Phaser.Scene {
       const gameWidth = this.cameras.main.width;
       const gameHeight = this.cameras.main.height;
 
-
       // 실제 화면 크기 좌표로 변환
       const itemX = x * gameWidth;
       const itemY = y * gameHeight;
 
-      
-
       // 스프라이트 추가
-      const itme = this.matter.add.sprite(itemX , itemY, name + '-1').setScale(2);
+      const itme = this.matter.add.sprite(itemX, itemY, name + '-1').setScale(2);
       itme.setBody(
         Matter.Bodies.rectangle(0, 0, itme.width * 2, itme.height * 2, {
           isSensor: false,
@@ -272,11 +284,10 @@ export default class Stage1Scene extends Phaser.Scene {
       itme.body.label = name; // label을 직접 설정
       itme.setFixedRotation(); // 회전하지 않도록 설정
 
-      itme.play(name.split(":")[0] + 'Animation');
+      itme.play(name.split(':')[0] + 'Animation');
 
       // 생성된 아이템을 this.gems 배열에 추가
       this.itmes[itme.body.label] = itme;
-
     });
 
     this.socket.on('updateUserInfo', (data) => {
@@ -284,36 +295,30 @@ export default class Stage1Scene extends Phaser.Scene {
       const { stage, score } = data.payload.message;
 
       // 현재 스테이지와 데이터로 받은 스테이지 정보가 다르다면?
-      if(SocketManager.getInstance().currentStage !== stage ) {
-        // 스테이지를 변경한다. 
+      if (SocketManager.getInstance().currentStage !== stage) {
+        // 스테이지를 변경한다.
         SocketManager.getInstance().currentStage = stage;
         titleText.setText(`${stage}스테이지`);
       }
 
       // 점수는 그냥 반영해도 된다.
-      SocketManager.getInstance().currentScore = score; 
+      SocketManager.getInstance().currentScore = score;
       scoreText.setText(`점수 : ${score}`);
-
     });
 
-
     this.socket.on('removeCollectedItem', (data) => {
-
       const itemId = data.payload.message;
       console.log(itemId);
-
 
       console.log(this.itmes[itemId]);
       console.log(this.itmes[itemId].length);
       // 아이템 먹으면 메세지를 보내자.
       if (this.itmes[itemId]) {
-        console.log("잘들어오나요?");
+        console.log('잘들어오나요?');
         this.itmes[itemId].destroy(); // 아이템 객체 삭제
         delete this.itmes[itemId]; // 객체에서 아이템 삭제
-
       }
     });
-
   }
 }
 
