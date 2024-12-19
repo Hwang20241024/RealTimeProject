@@ -9,7 +9,11 @@ export const cumulativeRankings = async () => {
 
   
   
-  
+  // await redisManager.updateData('user:황윤석','current_info',{stage: 0, score:0});
+  // await redisManager.updateData('user:황만석','current_info',{stage: 0, score:0});
+  // await redisManager.updateData('user:ghkdaksdbs','current_info',{stage: 0, score:0});
+  // await redisManager.updateData('user:sinnoing','current_info',{stage: 0, score:0});
+  // await redisManager.updateData('user:Test','current_info',{stage: 0, score:0});
   //await redisManager.getAllDataFromAllKeys();
   
   //정렬

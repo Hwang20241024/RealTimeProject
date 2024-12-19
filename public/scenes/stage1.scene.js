@@ -196,8 +196,7 @@ export default class Stage1Scene extends Phaser.Scene {
 
 
         // 서버에 메세지 .
-        const name = collidedLabel.split(":")[0];
-        SocketManager.getInstance().sendEvent("itemPickedUp", 9, {status: 'success', message: name});
+        SocketManager.getInstance().sendEvent("itemPickedUp", 9, {status: 'success', message: collidedLabel});
       }
     });
 
@@ -260,20 +259,20 @@ export default class Stage1Scene extends Phaser.Scene {
       const itemX = x * gameWidth;
       const itemY = y * gameHeight;
 
-      const gemId = Phaser.Utils.String.UUID(); // 고유 ID 부여
+      
 
       // 스프라이트 추가
       const itme = this.matter.add.sprite(itemX , itemY, name + '-1').setScale(2);
       itme.setBody(
         Matter.Bodies.rectangle(0, 0, itme.width * 2, itme.height * 2, {
           isSensor: false,
-          label: name + ':' + gemId,
+          label: name,
         }), // 히트박스 크기 설정
       );
-      itme.body.label = name + ':' + gemId; // label을 직접 설정
+      itme.body.label = name; // label을 직접 설정
       itme.setFixedRotation(); // 회전하지 않도록 설정
 
-      itme.play(name + 'Animation');
+      itme.play(name.split(":")[0] + 'Animation');
 
       // 생성된 아이템을 this.gems 배열에 추가
       this.itmes[itme.body.label] = itme;
@@ -295,6 +294,24 @@ export default class Stage1Scene extends Phaser.Scene {
       SocketManager.getInstance().currentScore = score; 
       scoreText.setText(`점수 : ${score}`);
 
+    });
+
+
+    this.socket.on('removeCollectedItem', (data) => {
+
+      const itemId = data.payload.message;
+      console.log(itemId);
+
+
+      console.log(this.itmes[itemId]);
+      console.log(this.itmes[itemId].length);
+      // 아이템 먹으면 메세지를 보내자.
+      if (this.itmes[itemId]) {
+        console.log("잘들어오나요?");
+        this.itmes[itemId].destroy(); // 아이템 객체 삭제
+        delete this.itmes[itemId]; // 객체에서 아이템 삭제
+
+      }
     });
 
   }

@@ -29,6 +29,7 @@ const stageHandler = (io) => {
     const rankings = handlerMappings[6];
     const spawnItem = handlerMappings[9];
     const updateUserInfo = handlerMappings[10];
+    const removeCollectedItem = handlerMappings[11];
 
     // 로그 보내기.
     gameLog(io, socketUser.socket, 2, `게임에 접속하신걸 환영합니다.`);
@@ -94,7 +95,7 @@ const stageHandler = (io) => {
       let current_info = await redisManager.getData(userName, 'current_info');
 
       // 2. 아이템의 점수를 가져오자.
-      const itemName = 'item:' + data.payload.message;
+      const itemName = 'item:' + data.payload.message.split(":")[0];
       let itemScore = await redisManager.getData(itemName, 'score');
 
       // 3. 점수를 계산 한다. (시간이 없어서 간단하게 아이템점수*스테이지 )
@@ -124,6 +125,9 @@ const stageHandler = (io) => {
 
       // 7. 실시간 랭킹도 갱신하자.
       rankings(io, socketUser.socket, 'realTimeRankings', await realTimeRankings());
+
+      // 8. 리스폰된 아이템 갱신
+      removeCollectedItem(socketUser.socket, data.payload.message);
     });
 
     // 스테이지 2

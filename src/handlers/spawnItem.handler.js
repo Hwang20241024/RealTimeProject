@@ -1,5 +1,6 @@
 import RedisManager from '../utils/redisManager.js';
 import { CLIENT_VERSION } from '../constants.js';
+import { v4 as uuidv4 } from 'uuid';
 
 /*==== 아이템 생성, 스테이지 생성.(db에 새로운 아이템 추가하는용도. 로직에 상관x) ====*/
 export const createItem = async ()=>  {
@@ -35,8 +36,11 @@ export const spawnItem = async (io, socket) => {
       // 2. 좌표는 초기에는 반응형 처럼 환경에따라 0 ~ 1 비율로 지정
       // 2-1. 반응형 웹사이트마냥 환경에따라 크기다르게 할려고했던 흔적.. 슬픕니다 ㅜㅜ
       
+      const uuid = uuidv4();
+      const itemId = items[Math.floor(Math.random() * items.length)] + ':' + uuid;
+
       const data = {
-        name : items[Math.floor(Math.random() * items.length)],
+        name : itemId,
         x : Math.random(),
         y : Math.random() * 0.1,
       }

@@ -98,3 +98,13 @@ export const updateUserInfo = (socket, data) => {
     payload: { status: 'success', message: data },
   });
 };
+
+// 아이템 삭제.
+export const removeCollectedItem = (socket,data) => {
+  socket.broadcast.emit('removeCollectedItem', {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 11,
+    payload: { status: 'success', message: data },
+  });
+};
