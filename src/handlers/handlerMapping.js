@@ -1,6 +1,8 @@
 import { nicknameEvent } from './nickname.handler.js';
 import { cumulativeRankings, realTimeRankings } from './rankings.handler.js';
-import { gameLog, mainUserInfo, rankings, seneChange, sendErrorMessage } from './helper.js';
+import { gameLog, mainUserInfo, rankings, seneChange, sendErrorMessage, updateUserInfo } from './helper.js';
+import { spawnItem } from './spawnItem.handler.js';
+
 
 const handlerMappings = {
   1: nicknameEvent, // 닉네임.
@@ -11,6 +13,8 @@ const handlerMappings = {
   6: rankings, // 랭킹.
   7: seneChange, // 씬체인지.
   8: sendErrorMessage, // 에러
+  9: spawnItem, // 아이템 리스폰
+  10: updateUserInfo, // 유저정보갱신.
   
 };
 

@@ -48,7 +48,7 @@ export const mainUserInfo = (socket, data, name) => {
 };
 
 // 랭킹 패킷 보내기
-export const rankings = (socket, type, data) => {
+export const rankings = (io, socket, type, data) => {
   if (type === 'cumulativeRankings') {
     // 누적 랭킹.
     socket.emit('cumulativeRankings', {
@@ -59,7 +59,7 @@ export const rankings = (socket, type, data) => {
     });
   } else if (type === 'realTimeRankings') {
     // 실시간 랭킹.
-    socket.emit('realTimeRankings', {
+    io.emit('realTimeRankings', {
       userId: socket.id,
       clientVersion: CLIENT_VERSION,
       handlerId: 3,
@@ -88,3 +88,13 @@ export const sendErrorMessage = (socket,type,data)=> {
     payload: { status: 'fail', message: data },
   });
 }
+
+// 유저정보갱신. updateUserInfo
+export const updateUserInfo = (socket, data) => {
+  socket.emit('updateUserInfo', {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 10,
+    payload: { status: 'success', message: data },
+  });
+};

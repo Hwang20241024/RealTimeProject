@@ -27,6 +27,8 @@ const stageHandler = (io) => {
     const cumulativeRankings = handlerMappings[2];
     const realTimeRankings = handlerMappings[3];
     const rankings = handlerMappings[6];
+    const spawnItem = handlerMappings[9];
+    const updateUserInfo = handlerMappings[10];
 
     // 로그 보내기.
     gameLog(io, socketUser.socket, 2, `게임에 접속하신걸 환영합니다.`);
@@ -35,7 +37,7 @@ const stageHandler = (io) => {
     gameLog(io, socketUser.socket, 1, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
 
     // 랭킹보내기
-    rankings(socketUser.socket, 'cumulativeRankings', await cumulativeRankings());
+    rankings(io, socketUser.socket, 'cumulativeRankings', await cumulativeRankings());
 
     // redis 인스턴스 연결.
     const redisManager = RedisManager.getInstance();
@@ -74,7 +76,7 @@ const stageHandler = (io) => {
 
         // 1-8. 각종 ui 변경.
         gameLog(io, socketUser.socket, 4, `[실시간 랭킹]`);
-        rankings(socketUser.socket, 'realTimeRankings', await realTimeRankings());
+        rankings(io,socketUser.socket, 'realTimeRankings', await realTimeRankings());
       } else {
         // 중복입장 막기.
         sendErrorMessage(socketUser.socket, 0, '이미 접속한 유저입니다.');
@@ -82,6 +84,47 @@ const stageHandler = (io) => {
     });
 
     // 스테이지 1
+    // 아이템 스폰.
+    spawnItem(io, socketUser.socket);
+
+    // 유저 아이템 획득
+    socket.on('itemPickedUp', async (data) => {
+      // 1. 일단 데이터를 가져오자 현재 스테이지, 현재 점수.
+      const userName = 'user:' + socketUser.name;
+      let current_info = await redisManager.getData(userName, 'current_info');
+
+      // 2. 아이템의 점수를 가져오자.
+      const itemName = 'item:' + data.payload.message;
+      let itemScore = await redisManager.getData(itemName, 'score');
+
+      // 3. 점수를 계산 한다. (시간이 없어서 간단하게 아이템점수*스테이지 )
+      const collectedScore = itemScore * current_info.stage;
+      current_info.score = current_info.score + collectedScore;
+
+      // 4. 현재 점수가 스테이지를 넘을 수 있는가 확인.
+      const stageName = 'stage:' + current_info.stage;
+      let nextStageScore = await redisManager.getData(stageName, 'nextStageScore');
+
+      if (current_info.score >= nextStageScore) {
+        if (current_info.stage !== 5) {
+          current_info.stage = current_info.stage + 1;
+
+          // 스테이지 이동시 전체로그
+          const str = ` ${socketUser.name}님이 ${current_info.stage}스테이지로 이동하셨습니다. `;
+
+          gameLog(io, socketUser.socket, 0, str);
+        }
+      }
+
+      // 5. 유저의 데이터를 갱신한다.
+      await redisManager.updateData(userName, 'current_info', current_info);
+
+      // 6. 갱신한 정보를 유저에게 보낸다.
+      updateUserInfo(socketUser.socket, current_info);
+
+      // 7. 실시간 랭킹도 갱신하자.
+      rankings(io, socketUser.socket, 'realTimeRankings', await realTimeRankings());
+    });
 
     // 스테이지 2
 
@@ -94,15 +137,35 @@ const stageHandler = (io) => {
     // 클라이언트에서 접속헤제 했을때 이벤트
     socket.on('disconnect', async () => {
       connectedSocketsCount--;
+
+      // 닉네임이 없다는건 게임 실행을 안했다는것 저장할 필요가없다. 
+      if (socketUser.currentStage !== 0) {
+        const userName = 'user:' + socketUser.name;
+        let current_info = await redisManager.getData(userName, 'current_info');
+        let best_info = await redisManager.getData(userName, 'best_info');
+
+        const defaultValues = {
+          stage: 0,
+          score: 0,
+        };
+
+        // 기록이 갱신 했다면.
+        if (current_info.score > best_info.score) {
+          best_info.stage = current_info.stage;
+          best_info.score = current_info.score;
+
+          await redisManager.updateData(userName, 'best_info', best_info);
+          await redisManager.updateData(userName, 'current_info', defaultValues);
+        } else {
+          await redisManager.updateData(userName, 'current_info', defaultValues);
+        }
+
+        gameLog(io, socketUser.socket, 0, `${userName}님이 접속을 종료했습니다.`);
+      }
+
       gameLog(io, socketUser.socket, 0, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
       gameLog(io, socketUser.socket, 1, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
-
-      const currentInfo = {
-        stage: 0,
-        score: 0,
-      };
-      const str = 'user:황만석';
-      await redisManager.updateData(str, 'current_info', currentInfo);
+   
     });
   });
 };

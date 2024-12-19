@@ -7,15 +7,10 @@ export const cumulativeRankings = async () => {
   // 유저 데이터를 불러온다.
   const userData = await redisManager.getDataByPrefix('user');
 
-  const currentInfo = {
-    stage: 0,
-    score: 0,
-  };
-  const str = 'user:황윤석';
-  await redisManager.updateData(str, 'current_info', currentInfo);
-
-
-  // await redisManager.getAllDataFromAllKeys();
+  
+  
+  
+  //await redisManager.getAllDataFromAllKeys();
   
   //정렬
   const cumulativeRankings = getSortedLeaderboard(userData, 'cumulative');

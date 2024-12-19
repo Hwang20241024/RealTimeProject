@@ -1,10 +1,14 @@
-
+import SocketManager from '../socket.manager.js';
 
 export default class Stage1Scene extends Phaser.Scene {
   constructor() {
     super({ key: 'Stage1Scene' });
     this.canJump = false;
     this.isJump = false;
+    this.socket = SocketManager.getInstance().socket;
+
+    //
+    this.itmes = {};
   }
 
   create() {
@@ -71,52 +75,6 @@ export default class Stage1Scene extends Phaser.Scene {
       repeat: -1, // 무한 반복
       ease: 'Sine.easeInOut', // 부드럽게 움직임
     });
-
-    // 스프라이트 추가
-    this.gem = this.matter.add.sprite(100, 150, 'gem-1').setScale(2);
-    this.gem.setBody(
-      Matter.Bodies.rectangle(0, 0, this.gem.width * 2, this.gem.height * 2, {
-        isSensor: false,
-        label: 'gem',
-      }), // 히트박스 크기 설정
-    );
-    this.gem.body.label = 'gem'; // label을 직접 설정
-    this.gem.setFixedRotation(); // 회전하지 않도록 설정
-
-    this.cherry = this.matter.add.sprite(200, 150, 'cherry-1').setScale(2);
-    this.cherry.setBody(
-      Matter.Bodies.rectangle(0, 0, this.cherry.width * 2, this.cherry.height * 2, {
-        isSensor: false,
-        label: 'cherry',
-      }), // 히트박스 크기 설정
-    );
-    this.cherry.body.label = 'cherry'; // label을 직접 설정
-    this.cherry.setFixedRotation(); // 회전하지 않도록 설정
-
-    // 충돌 이벤트
-    this.gem.setOnCollide((collisionData) => {
-      const collidedWith = collisionData.bodyB.label; // 충돌한 객체의 라벨 확인
-      console.log('Gem collided with:', collidedWith);
-
-      if (collidedWith === 'player') {
-        console.log('Gem collected by the player!');
-        this.gem.destroy(); // Gem 제거
-      }
-    });
-
-    this.cherry.setOnCollide((collisionData) => {
-      const collidedWith = collisionData.bodyB.label; // 충돌한 객체의 라벨 확인
-      console.log('Cherry collided with:', collidedWith);
-
-      if (collidedWith === 'player') {
-        console.log('Cherry collected by the player!');
-        this.cherry.destroy(); // Gem 제거
-      }
-    });
-
-    // 애니메이션 실행
-    this.gem.play('gemAnimation');
-    this.cherry.play('cherryAnimation');
 
     // 바닥 이미지 (이미지는 충돌에 영향을 주지 않도록 설정)
     this.ground = this.add.image(0, this.sys.game.config.height - 272, 'forest-tiles');
@@ -227,9 +185,24 @@ export default class Stage1Scene extends Phaser.Scene {
         collidedLabel === 'groundCollider5'
       ) {
         this.canJump = true; // 점프 가능 상태 설정
-        this.isJump = false; // 점프중이아니다. 
+        this.isJump = false; // 점프중이아니다.
+      }
+
+      // 아이템 먹으면 메세지를 보내자.
+      if (this.itmes[collidedLabel]) {
+        this.itmes[collidedLabel].destroy(); // gem 객체 삭제
+        delete this.itmes[collidedLabel]; // 객체에서 gem 삭제
+
+
+
+        // 서버에 메세지 .
+        const name = collidedLabel.split(":")[0];
+        SocketManager.getInstance().sendEvent("itemPickedUp", 9, {status: 'success', message: name});
       }
     });
+
+    // 메세지 처리
+    this.handleMessage(Matter, titleText, healthText, scoreText);
   }
 
   update() {
@@ -267,17 +240,68 @@ export default class Stage1Scene extends Phaser.Scene {
     }
 
     // 점프 후 내려가는 중일 때
-    if (this.player.body.velocity.y > 0 && this.isJump ) {
+    if (this.player.body.velocity.y > 0 && this.isJump) {
       // 떨어지는 동안 스프라이트 변경
       this.player.setTexture('player-jumpDown'); // 점프 내려가는 스프라이트로 변경
     }
+  }
+
+  // 서버에서 받은 메세지 처리.
+  handleMessage(Matter, titleText, healthText, scoreText ) {
+    // 아이템 생성.
+    this.socket.on('spawnItem', (data) => {
+      //데이터 처리
+      const { name, x, y } = data.payload.message;
+      const gameWidth = this.cameras.main.width;
+      const gameHeight = this.cameras.main.height;
+
+
+      // 실제 화면 크기 좌표로 변환
+      const itemX = x * gameWidth;
+      const itemY = y * gameHeight;
+
+      const gemId = Phaser.Utils.String.UUID(); // 고유 ID 부여
+
+      // 스프라이트 추가
+      const itme = this.matter.add.sprite(itemX , itemY, name + '-1').setScale(2);
+      itme.setBody(
+        Matter.Bodies.rectangle(0, 0, itme.width * 2, itme.height * 2, {
+          isSensor: false,
+          label: name + ':' + gemId,
+        }), // 히트박스 크기 설정
+      );
+      itme.body.label = name + ':' + gemId; // label을 직접 설정
+      itme.setFixedRotation(); // 회전하지 않도록 설정
+
+      itme.play(name + 'Animation');
+
+      // 생성된 아이템을 this.gems 배열에 추가
+      this.itmes[itme.body.label] = itme;
+
+    });
+
+    this.socket.on('updateUserInfo', (data) => {
+      // 데이터 처리.
+      const { stage, score } = data.payload.message;
+
+      // 현재 스테이지와 데이터로 받은 스테이지 정보가 다르다면?
+      if(SocketManager.getInstance().currentStage !== stage ) {
+        // 스테이지를 변경한다. 
+        SocketManager.getInstance().currentStage = stage;
+        titleText.setText(`${stage}스테이지`);
+      }
+
+      // 점수는 그냥 반영해도 된다.
+      SocketManager.getInstance().currentScore = score; 
+      scoreText.setText(`점수 : ${score}`);
+
+    });
 
   }
 }
 
-
-// 1. 서버에서 아템 뿌린다. 
+// 1. 서버에서 아템 뿌린다.
 // 2. 클라에서 아이템을 먹으면 서버에알린다.
-// 3. 서버에서 점수를 db에 저장하고 
+// 3. 서버에서 점수를 db에 저장하고
 // 4. 정보를 클라에 뿌린다. (점수 , 체력, 스테이지 등등.)
 // 5. 클라는 정보를 갱신한다.

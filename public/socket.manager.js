@@ -149,6 +149,9 @@ class SocketManager {
     /*=================*/
 
 
+    
+
+
     /*==== 게임로그 ====*/
     this.socket.on('gameLog_DEFAULT', (data) => {
       // 로그 메세지 추가.
