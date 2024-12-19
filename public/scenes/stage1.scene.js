@@ -7,8 +7,10 @@ export default class Stage1Scene extends Phaser.Scene {
     this.isJump = false;
     this.socket = SocketManager.getInstance().socket;
 
-    //
+    // 오브젝트들(?)
     this.itmes = {};
+    this.users = {};
+    this.userNames = {};
   }
 
   create() {
@@ -220,6 +222,8 @@ export default class Stage1Scene extends Phaser.Scene {
     // 플레이어 이름
     this.playerNameText.setPosition(this.player.x, this.player.y - 30); // 플레이어 위로 텍스트 위치 설정
 
+    // sendPosition
+
     // 플레이어 이동 처리
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-2);
@@ -227,17 +231,25 @@ export default class Stage1Scene extends Phaser.Scene {
       if (!this.isJump) {
         this.player.anims.play('playerRunAnimation', true);
       }
+       // 서버에 메세지.
+       this.sendUserInfo(this.player, 1, 'playerRunAnimation', false);
     } else if (this.cursors.right.isDown) {
       this.player.setVelocityX(2);
       this.player.flipX = false;
       if (!this.isJump) {
         this.player.anims.play('playerRunAnimation', true);
+       
       }
+       // 서버에 메세지.
+       this.sendUserInfo(this.player, 2, 'playerRunAnimation', false);
     } else {
       this.player.setVelocityX(0);
       if (!this.isJump) {
         this.player.anims.play('playerIdleAnimation', true);
+  
       }
+      // 서버에 메세지.
+      this.sendUserInfo(this.player, 0, 'playerIdleAnimation', false);
     }
 
     // 플레이어 점프처리
@@ -251,12 +263,18 @@ export default class Stage1Scene extends Phaser.Scene {
     if (this.player.body.velocity.y < 0 && this.isJump) {
       // 점프 올라가는 동안의 스프라이트 유지
       this.player.setTexture('player-jumpUp'); // 점프 올라가는 스프라이트로 유지
+
+      // 서버에 메세지.
+      this.sendUserInfo(this.player, 0, 'player-jumpUp',true);
     }
 
     // 점프 후 내려가는 중일 때
     if (this.player.body.velocity.y > 0 && this.isJump) {
       // 떨어지는 동안 스프라이트 변경
       this.player.setTexture('player-jumpDown'); // 점프 내려가는 스프라이트로 변경
+
+      // 서버에 메세지.
+      this.sendUserInfo(this.player, 0, 'player-jumpDown',true);
     }
   }
 
@@ -308,22 +326,105 @@ export default class Stage1Scene extends Phaser.Scene {
 
     this.socket.on('removeCollectedItem', (data) => {
       const itemId = data.payload.message;
-      console.log(itemId);
 
-      console.log(this.itmes[itemId]);
-      console.log(this.itmes[itemId].length);
       // 아이템 먹으면 메세지를 보내자.
       if (this.itmes[itemId]) {
-        console.log('잘들어오나요?');
         this.itmes[itemId].destroy(); // 아이템 객체 삭제
         delete this.itmes[itemId]; // 객체에서 아이템 삭제
       }
     });
+
+    // 유저 추가!
+    this.socket.on('updateUserAction', (data) => {
+      setTimeout(() => {
+        const { name, flipx, aniKey, x, y , isJump} = data.payload.message;
+        console.log(data.payload.message);
+
+        // 처음접속하는 유저라면?
+        if (!this.users[name]) {
+          this.users[name] = this.add.sprite(x, y, 'player-idle-1').setScale(3);
+          // 애니메이션 설정
+          this.users[name].anims.play(aniKey, true);
+
+          // 플레이어의 화면 위치도 설정 (필요한 경우)
+          this.users[name].setPosition(x, y); // 화면상의 위치 설정
+
+          // 텍스트 설정
+          this.userNames[name] = this.add
+            .text(x, y - 30, name, {
+              font: '12px Arial',
+              fill: '#ffffff',
+              stroke: '#000000',
+              strokeThickness: 2,
+              align: 'center',
+            })
+            .setOrigin(0.5, 0.5);
+        } else {
+          // 위치 갱신.
+          this.users[name].setPosition(x, y);
+
+          // 애니메이션 및 텍스처 갱신
+          if (aniKey !== 'player-jumpUp' && aniKey !== 'player-jumpDown') {
+            // 점프 상태가 아니면 애니메이션 갱신
+            if (!this.users[name].isJump) {
+              this.users[name].anims.play(aniKey, true);
+            }
+          } else {
+            this.users[name].setTexture(aniKey);
+          }
+
+          // flipX 값 갱신
+          if (flipx >= 1 && flipx <= 2) {
+            switch (flipx) {
+              case 1:
+                this.users[name].flipX = true;
+                break;
+              case 2:
+                this.users[name].flipX = false;
+                break;
+            }
+          }
+
+          // 닉네임 갱신
+          this.userNames[name].setPosition(x, y - 30);
+        }
+      }, 0); // 200ms 딜레이 후 처리
+    });
+
+    // 나간 유저를 지우자.
+    this.socket.on('removeUser', (data) => {
+      const name = data.payload.message;
+
+      if (this.users[name]) {
+        this.users[name].destroy(); 
+        delete this.users[name]; 
+      }
+
+      if (this.userNames[name]) {
+        this.userNames[name].destroy(); 
+        delete this.userNames[name]; 
+      }
+    });
+
+    //removeUser
+
+
+  }
+
+  // 유저정보를 보내자.
+  sendUserInfo(player, flipx, anikey, isjump) {
+    setTimeout(() => {
+      const userInfo = {
+        name: SocketManager.getInstance().name,
+        flipx: flipx,
+        aniKey: anikey,
+        x: this.player.x,
+        y: this.player.y,
+        isJump : false,
+      };
+
+      // 서버에 보냄
+      SocketManager.getInstance().sendPosition(12, userInfo);
+    }, 100); // 100ms 후 실행
   }
 }
-
-// 1. 서버에서 아템 뿌린다.
-// 2. 클라에서 아이템을 먹으면 서버에알린다.
-// 3. 서버에서 점수를 db에 저장하고
-// 4. 정보를 클라에 뿌린다. (점수 , 체력, 스테이지 등등.)
-// 5. 클라는 정보를 갱신한다.

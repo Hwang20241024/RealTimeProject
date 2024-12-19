@@ -1,6 +1,6 @@
 import { nicknameEvent } from './nickname.handler.js';
 import { cumulativeRankings, realTimeRankings } from './rankings.handler.js';
-import { gameLog, mainUserInfo, rankings, seneChange, sendErrorMessage, updateUserInfo, removeCollectedItem } from './helper.js';
+import { gameLog, mainUserInfo, rankings, seneChange, sendErrorMessage, updateUserInfo, removeCollectedItem, updateUserAction, removeUser } from './helper.js';
 import { spawnItem } from './spawnItem.handler.js';
 
 
@@ -16,6 +16,8 @@ const handlerMappings = {
   9: spawnItem, // 아이템 리스폰
   10: updateUserInfo, // 유저정보갱신.
   11: removeCollectedItem, // 아이템삭제 (다른 유저에게 보내는용도.)
+  12: updateUserAction,  // 유저 행동갱신.
+  13: removeUser, // 유저 지우기
   
 };
 

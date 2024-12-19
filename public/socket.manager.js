@@ -104,7 +104,10 @@ class SocketManager {
     /*==== 랭킹메세지 ====*/
     this.socket.on('cumulativeRankings', (data) => {
       // 현재 위치가 메인이면 누적 랭킹 표시.
-      if ((this._currentStage === 0 || this._currentStage === null) && data.payload.status === 'success') {
+      if (
+        (this._currentStage === 0 || this._currentStage === null) &&
+        data.payload.status === 'success'
+      ) {
         // 연결.
         const rankingsElement = document.querySelector('#game-info-rankings');
 
@@ -121,7 +124,7 @@ class SocketManager {
           // rankingsElement에 추가
           rankingsElement.appendChild(newParagraph);
         });
-      };
+      }
     });
 
     this.socket.on('realTimeRankings', (data) => {
@@ -144,13 +147,9 @@ class SocketManager {
           // rankingsElement에 추가
           rankingsElement.appendChild(newParagraph);
         });
-      };
+      }
     });
     /*=================*/
-
-
-    
-
 
     /*==== 게임로그 ====*/
     this.socket.on('gameLog_DEFAULT', (data) => {
@@ -182,7 +181,6 @@ class SocketManager {
     });
 
     /*=================*/
-
   }
 
   // 여러군대에서 사용할 메세지.
@@ -192,6 +190,19 @@ class SocketManager {
       clientVersion: CLIENT_VERSION,
       handlerId,
       payload,
+    });
+  }
+
+  // 포지션 메세지.
+  sendPosition(handlerId, data) {
+    this.socket.emit('sendPosition', {
+      userId: this._userId,
+      clientVersion: CLIENT_VERSION,
+      handlerId,
+      payload: {
+        status: 'success',
+        message: data,
+      },
     });
   }
 }

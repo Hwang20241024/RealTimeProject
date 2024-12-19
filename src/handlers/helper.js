@@ -108,3 +108,23 @@ export const removeCollectedItem = (socket,data) => {
     payload: { status: 'success', message: data },
   });
 };
+
+// 유저행동갱신 
+export const updateUserAction = (socket,data) => {
+  socket.broadcast.emit('updateUserAction', {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 12,
+    payload: { status: 'success', message: data },
+  });
+};
+
+// 유저지우기..
+export const removeUser = (socket, data) => {
+  socket.broadcast.emit('removeUser', {
+    userId: socket.id,
+    clientVersion: CLIENT_VERSION,
+    handlerId: 13,
+    payload: { status: 'success', message: data },
+  });
+};

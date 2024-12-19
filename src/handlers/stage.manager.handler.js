@@ -30,7 +30,9 @@ const stageHandler = (io) => {
     const spawnItem = handlerMappings[9];
     const updateUserInfo = handlerMappings[10];
     const removeCollectedItem = handlerMappings[11];
-
+    const updateUserAction = handlerMappings[12];
+    const removeUser = handlerMappings[13];
+   
     // 로그 보내기.
     gameLog(io, socketUser.socket, 2, `게임에 접속하신걸 환영합니다.`);
     gameLog(io, socketUser.socket, 2, `닉네임을 입력하시고 버튼을 누르면 게임을 실행합니다.`);
@@ -47,10 +49,12 @@ const stageHandler = (io) => {
     socket.on('nicknameEvent', async (data) => {
       // 1-1. 존재하는 닉네임인지 확인하고 없다면 새로 생성, 있다면 기존에 있는 걸 가져온다.
       const info = await nicknameEvent(data, socketUser.userInfo);
-      socketUser.initializeUser(info);
-
+      
       // 1-2. 가져왔는데 스테이지가 메인스테이지가 아니면 접속중이다.
-      if (socketUser.currentStage === 0) {
+      if (socketUser.currentStage === 0 && info) {
+
+        socketUser.initializeUser(info);
+
         // 1-3. 소캣 스테이지 정보를 1로 바꾼다.
         socketUser.currentStage = 1;
 
@@ -127,10 +131,16 @@ const stageHandler = (io) => {
       rankings(io, socketUser.socket, 'realTimeRankings', await realTimeRankings());
 
       // 8. 리스폰된 아이템 갱신
-      removeCollectedItem(socketUser.socket, data.payload.message);
+      removeCollectedItem(socketUser.socket, data.payload.message)
     });
 
-    // 스테이지 2
+    // 유저 포지션
+    socket.on('sendPosition', async (data) => {
+      // 바로 유저들에게 정보 전달.
+      updateUserAction(socketUser.socket, data.payload.message);
+    });
+
+    // 스테이지 2 updateUserAction
 
     // 스테이지 3
 
@@ -164,7 +174,8 @@ const stageHandler = (io) => {
           await redisManager.updateData(userName, 'current_info', defaultValues);
         }
 
-        gameLog(io, socketUser.socket, 0, `${userName}님이 접속을 종료했습니다.`);
+        removeUser(socketUser.socket, socketUser.name);
+        gameLog(io, socketUser.socket, 0, `${socketUser.name}님이 접속을 종료했습니다.`);
       }
 
       gameLog(io, socketUser.socket, 0, `현재 접속인원은 ${connectedSocketsCount}명입니다.`);
