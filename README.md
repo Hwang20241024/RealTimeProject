@@ -84,7 +84,14 @@
 6. 게임 로그는 접속한 인원, 유저의 스테이지, 나간 유저의 기록을 표시합니다.
 
 
-# 3. Technologies Used
+# 3. 게임 
+
+1. 게임 아이템은 2개 있으며 스테이지 마다 점수가 다릅니다.
+
+2. 스테이지는 5스테이지 까지있고 3000 -> 6000 -> 9000 -> 12000 점수가 넘으면 다음스테이지로 넘어갑니다.
+
+   
+# 4. Technologies Used
 ![js](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white)
 ![redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
