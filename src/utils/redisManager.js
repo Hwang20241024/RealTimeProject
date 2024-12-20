@@ -64,28 +64,6 @@ class RedisManager {
     }
   }
 
-
-  // 데이터 생성 (HSET)
-  // async createData(key, userInfo) {
-  //   try {
-  //     // userInfo 객체를 필드별로 나누어서 저장, 필드값을 JSON.stringify로 직렬화
-  //     const serializedUserInfo = {};
-  //     for (const field in userInfo) {
-  //       if (userInfo.hasOwnProperty(field)) {
-  //         serializedUserInfo[field] = JSON.stringify(userInfo[field]); // 객체를 문자열로 직렬화
-  //       }
-  //     }
-  
-  //     // hset으로 직렬화된 값들을 저장
-  //     const result = await this.redis.hset(key, serializedUserInfo);
-  //     console.log('데이터 저장 완료:', result);
-  //     return result;
-  //   } catch (error) {
-  //     console.error('데이터 저장 실패:', error);
-  //     throw error;
-  //   }
-  // }
-  
   // 데이터 생성 (HSET)
 async createData(key, userInfo) {
   try {
@@ -149,7 +127,6 @@ async createData(key, userInfo) {
   }
 
   // 전체 데이터 조회 (HGETALL)
-  // 전체 데이터 조회 (HGETALL)
 async getAllData(key) {
   try {
     const result = await this.redis.hgetall(key);
@@ -170,34 +147,6 @@ async getAllData(key) {
     throw error;
   }
 }
-
-
-  // 접두어로 데이터 조회 (HGETALL, HSCAN)
-  // 접두어로 데이터 조회 (HGETALL, HSCAN)
-// async getDataByPrefix(prefix) {
-//   const resultData = {};
-//   try {
-//     // 접두어에 해당하는 모든 key들을 가져오기 위해 HGETALL 사용
-//     const keys = await this.redis.keys(`${prefix}:*`); // 해당 접두어로 시작하는 모든 키를 찾기
-
-//     // 각 키에 대해서 데이터 조회
-//     for (const key of keys) {
-//       const data = await this.redis.hgetall(key); // 해당 key의 모든 데이터를 가져옴
-//       if (data) {
-//         // 필요한 경우 데이터를 파싱 (필드가 객체일 경우 JSON.parse 필요)
-//         for (const field in data) {
-//           if (data.hasOwnProperty(field)) {
-//             resultData[key] = { [field]: JSON.parse(data[field]) }; // JSON 파싱 후 저장
-//           }
-//         }
-//       }
-//     }
-//     return resultData;
-//   } catch (error) {
-//     console.error('접두어로 데이터 조회 실패:', error);
-//     throw error;
-//   }
-// }
 
 // 접두어로 데이터 조회 (HGETALL, HSCAN)
 async getDataByPrefix(prefix) {

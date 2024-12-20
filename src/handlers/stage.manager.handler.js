@@ -59,10 +59,6 @@ const stageHandler = (io) => {
       // 1-1. 존재하는 닉네임인지 확인하고 없다면 새로 생성, 있다면 기존에 있는 걸 가져온다.
       const info = await nicknameEvent(data, socketUser.userInfo);
 
-      //const nameValidation = 'user:' + data.payload.message;
-      //const userName = await redisManager.getAllData(nameValidation);
-
-
       console.log(info);
       
       // 1-2. 가져왔는데 스테이지가 메인스테이지가 아니면 접속중이다.
@@ -103,7 +99,7 @@ const stageHandler = (io) => {
 
     // 스테이지 1
     // 아이템 스폰.
-    spawnItem(io, socketUser.socket);
+    spawnItem(io, socketUser.socket, connectedSocketsCount);
 
     // 유저 아이템 획득
     socket.on('itemPickedUp', async (data) => {
@@ -152,14 +148,6 @@ const stageHandler = (io) => {
       // 바로 유저들에게 정보 전달.
       updateUserAction(socketUser.socket, data.payload.message);
     });
-
-    // 스테이지 2 updateUserAction
-
-    // 스테이지 3
-
-    // 스테이지 4
-
-    // 스테이지 5
 
     // 클라이언트에서 접속헤제 했을때 이벤트
     socket.on('disconnect', async () => {

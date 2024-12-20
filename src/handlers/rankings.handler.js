@@ -7,18 +7,7 @@ export const cumulativeRankings = async () => {
   // 유저 데이터를 불러온다.
   const userData = await redisManager.getDataByPrefix('user');
   await redisManager.getAllDataFromAllKeys(); // 전체 검색
-  //await redisManager.deleteAllData(); // 전체삭제
 
-  // await redisManager.createData("item:gem", {score: 100,} );
-  // await redisManager.createData("item:cherry", {score: 100,} );
-
-  // await redisManager.createData("stage:1", {nextStageScore: 3000, timeLimit : 180 } );
-  // await redisManager.createData("stage:2", {nextStageScore: 6000, timeLimit : 150 } );
-  // await redisManager.createData("stage:3", {nextStageScore: 9000, timeLimit : 120 } );
-  // await redisManager.createData("stage:4", {nextStageScore: 12000, timeLimit : 90 } );
-  // await redisManager.createData("stage:5", {nextStageScore: 15000, timeLimit : 60 } );
-
-  
   //정렬
   const cumulativeRankings = getSortedLeaderboard(userData, 'cumulative');
   return displayRankings(cumulativeRankings);
