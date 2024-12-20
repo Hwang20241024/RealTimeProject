@@ -89,4 +89,4 @@
 ![redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
 
-[![My Skills](https://skillicons.dev/icons?i=nodejs,mysql,aws&theme=light)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=nodejs,aws&theme=light)](https://skillicons.dev)
