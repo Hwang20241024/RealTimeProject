@@ -8,19 +8,19 @@ export default class SocketUser {
 
     // 각종 정보를 저장해 놓자.
     this._userInfo = {
-      uuid: null,
+      uuid: 0,
       health: 3,
       speed: 1,
       current_info: {
-        stage: null,
-        score: null,
+        stage: 0,
+        score: 0,
       },
       best_info: {
-        stage: null,
-        score: null,
+        stage: 0,
+        score: 0,
       },
-      x: null,
-      y: null,
+      x: 0,
+      y: 0,
     };
   }
 

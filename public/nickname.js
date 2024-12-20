@@ -18,6 +18,19 @@ document.getElementById('start-button').addEventListener('click', async () => {
       // 입력값 초기화
       inputElement.value = '';
     } else {
+      // 닉네임이 접속해 있는지 확인하자.
+      // socket.sendEvent('nicknameValidation', 1, { status: 'success', message: nickname });
+
+      // let validationName = '';
+      // socket.socket.on('nicknameValidation', (data) => {
+      //   validationName = data.payload.message;
+      // });
+
+      // if (validationName !== validationName) {
+      //   // 유효하면 소켓을 통해 서버로 닉네임 전송
+      //   socket.sendEvent('nicknameEvent', 1, { status: 'success', message: nickname });
+      // }
+
       // 유효하면 소켓을 통해 서버로 닉네임 전송
       socket.sendEvent('nicknameEvent', 1, { status: 'success', message: nickname });
 

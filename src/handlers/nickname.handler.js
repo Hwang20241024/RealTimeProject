@@ -39,7 +39,7 @@ export const nicknameEvent = async (data, userInfo) => {
       return info;
     } else {
       // 이미존재 한다면
-      return JSON.parse(JSON.stringify(user));
+      return user;
     }
   }
 };

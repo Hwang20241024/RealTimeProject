@@ -157,8 +157,10 @@ class SocketManager {
       addGameLogMessage(data.payload.message);
     });
     this.socket.on('gameLog_CURRENT_USERS', (data) => {
-      // 로그 메세지 추가.
-      updateUserCount(data.payload.message);
+      if (this._currentStage === null) {
+        // 로그 메세지 추가.
+        updateUserCount(data.payload.message);
+      }
     });
     this.socket.on('gameLog_USER_SPECIFIC', (data) => {
       // 로그 메세지 추가.
@@ -178,6 +180,7 @@ class SocketManager {
     this.socket.on('already_connected', (data) => {
       // 로그 메세지 추가.
       alert(data.payload.message);
+      location.reload();
     });
 
     /*=================*/
